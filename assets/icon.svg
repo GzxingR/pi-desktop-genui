@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="GenUI">
+  <title>GenUI</title>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f45e6"/>
+      <stop offset="1" stop-color="#7d3bee"/>
+    </linearGradient>
+  </defs>
+  <rect x="36" y="36" width="440" height="440" rx="104" fill="url(#tile)"/>
+  <g>
+    <rect x="132" y="132" width="248" height="84" rx="22" fill="#fff" fill-opacity="0.94"/>
+    <rect x="158" y="162" width="92" height="20" rx="10" fill="#4f45e6" fill-opacity="0.75"/>
+    <rect x="266" y="162" width="62" height="20" rx="10" fill="#fbbf24"/>
+  </g>
+  <g fill="#fff" fill-opacity="0.9">
+    <rect x="132" y="314" width="40" height="58" rx="12"/>
+    <rect x="196" y="280" width="40" height="92" rx="12"/>
+    <rect x="260" y="298" width="40" height="74" rx="12"/>
+  </g>
+  <circle cx="356" cy="314" r="41" fill="none" stroke="#fbbf24" stroke-width="22"/>
+</svg>

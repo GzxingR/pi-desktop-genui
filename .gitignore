@@ -1,0 +1,8 @@
+# The market tree and the packed artifact are build output, not source.
+build/
+dist/
+
+# Local editor / OS noise.
+.DS_Store
+Thumbs.db
+*.log

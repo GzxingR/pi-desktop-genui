@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.gzxingr.genui",
+  "name": "GenUI",
+  "version": "0.1.0",
+  "description": "PI-Desktop port of omdsh-dev/dsh-genui: the model describes an interface as a dsh-ui JSON spec and the plugin renders it as real interactive components — stat/table/chart/plot, cards, steps, timelines, forms, quizzes with local grading, and an action loop back to the model.",
+  "author": {
+    "name": "归星 (GzxingR)",
+    "url": "https://github.com/GzxingR"
+  },
+  "license": "MIT",
+  "categories": [
+    "developer-tools",
+    "productivity"
+  ],
+  "changelog": "0.1.0 — first PI-Desktop release. Port of omdsh-dev/dsh-genui (MIT): 44 dsh-ui component types rendered in the plugin's own panel, hand-written SVG charts and function plots with zero third-party render engines, the render_ui / validate_dsh_ui / genui_status tools, a dsh-ui fence in a reply captured at message_end and rewritten to a one-line pointer, and panel actions returned to the model as a [genui-action] message.\nNot implemented in this port: mermaid / echart / scene3d / diagram render as a labelled placeholder that preserves the original JSON.",
+  "i18n": {
+    "en": {
+      "name": "GenUI",
+      "description": "Give the model's answers a face: it describes an interface as a dsh-ui JSON spec and the plugin renders it as real interactive components in its own panel — stat cards, sortable/filterable tables, SVG charts and function plots, cards, steps, timelines, forms, quizzes graded locally, and an action loop back to the model. PI-Desktop exposes no plugin-extensible chat renderer, so a dsh-ui fence in a reply is captured and replaced by a one-line pointer instead of rendering inline.",
+      "safetyNotes": "Requests four permissions: ui.panel, agent.tool.register, agent.prompt.inject and agent.extension. PI-Desktop exposes no plugin-extensible chat renderer, so a dsh-ui spec is rendered in this plugin's own panel window instead of inside the reply; the reply itself keeps only a one-line pointer. No fs, net, clipboard, shell, session or background-service permission is requested. Both halves (plugin process and agent sidecar) use Node.js fs to read and write ONLY this plugin's own data directory under the PI-Desktop user folder, one folder per plugin id, and only four fixed filenames there: config, state, action and panel-request. No workspace access, no network access, no caller-supplied path. Panel actions are delivered back to the model as a normal user message so the model can respond. Full capability and data-flow review: docs/capability-data-flow.md."
+    },
+    "zh-CN": {
+      "name": "GenUI 生成式界面",
+      "description": "给回答装上界面：模型用 dsh-ui JSON 规格描述界面，插件在自己的面板里渲染成真实可交互组件——指标卡、可排序可过滤的表格、SVG 图表与函数曲线、卡片、步骤、时间线、表单、本地判卷测验，以及回传模型的动作回路。PI-Desktop 没有对插件开放的聊天渲染接口，因此回复里的 dsh-ui 围栏会被接管并替换为一行指引，而不是就地渲染。",
+      "safetyNotes": "申请四项权限：ui.panel、agent.tool.register、agent.prompt.inject、agent.extension。PI-Desktop 没有对插件开放的聊天渲染接口，因此 dsh-ui 规格渲染在本插件自己的面板窗口里，而不是回复正文中；回复里只保留一行指引。不申请 fs、net、clipboard、shell、session、background.service。插件的两半（插件进程与 Agent 侧）都用 Node.js fs 读写，且仅读写本插件自己的数据目录，即 PI-Desktop 用户目录下按插件 id 分的一个文件夹，且只有四个固定文件名：config、state、action、panel-request。不访问工作区、不联网、不接受调用方传入的路径。面板上的动作会作为一条普通用户消息回传给模型。完整的能力与数据流审查见 docs/capability-data-flow.md。"
+    }
+  },
+  "main": "main.js",
+  "ui": {
+    "panel": "renderer/index.html",
+    "title": {
+      "en": "GenUI",
+      "zh-CN": "GenUI 生成式界面"
+    },
+    "width": 1120,
+    "height": 860
+  },
+  "contributes": {
+    "agentExtensions": [
+      "src/extension.js"
+    ],
+    "commands": [
+      {
+        "id": "genui.open",
+        "title": "GenUI: 打开面板 / Open panel",
+        "keywords": [
+          "genui",
+          "dsh-ui",
+          "ui",
+          "panel",
+          "生成式界面"
+        ],
+        "category": "GenUI"
+      },
+      {
+        "id": "genui.status",
+        "title": "GenUI: 状态 / Status",
+        "keywords": [
+          "genui",
+          "status",
+          "状态"
+        ],
+        "category": "GenUI"
+      },
+      {
+        "id": "genui.clear",
+        "title": "GenUI: 清空当前界面 / Clear",
+        "keywords": [
+          "genui",
+          "clear",
+          "清空"
+        ],
+        "category": "GenUI"
+      },
+      {
+        "id": "genui.sample",
+        "title": "GenUI: 渲染示例 / Render sample",
+        "keywords": [
+          "genui",
+          "sample",
+          "示例",
+          "demo"
+        ],
+        "category": "GenUI"
+      }
+    ],
+    "agentTools": [
+      {
+        "name": "render_ui",
+        "description": "把一份 dsh-ui JSON 规格渲染成真实可交互界面，显示在 GenUI 面板窗口中（PI-Desktop 没有聊天内围栏渲染，所以这是本插件渲染界面的主通道）。规格与上游 dsh-genui 的 ```dsh-ui 围栏格式完全一致：{\"title\":\"...\",\"items\":[{\"type\":\"stat\",...}]}。组件词汇见 genui 技能。返回渲染结果（seq、组件数、被丢弃节点、是否含可交互动作）。",
+        "risk": "low",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "spec": {
+              "description": "dsh-ui 规格：可以是对象、根级数组、或双重编码的 JSON 字符串。例：{\"title\":\"订单概览\",\"items\":[{\"type\":\"stat\",\"label\":\"营收\",\"value\":\"¥128,430\",\"delta\":\"+12.4%\"}]}"
+            },
+            "title": {
+              "type": "string",
+              "description": "面板窗口标题（可选；缺省用规格的 title，再缺省用 “GenUI”）"
+            },
+            "replace": {
+              "type": "boolean",
+              "description": "true（默认）= 替换面板当前内容；false = 追加到当前内容之后（用于分步补充）"
+            }
+          },
+          "required": [
+            "spec"
+          ]
+        }
+      },
+      {
+        "name": "validate_dsh_ui",
+        "description": "校验并归一化一份 dsh-ui 规格，但不在面板里渲染。返回归一化后的规格、被丢弃的节点与原因、别名归一化提示，以及最终组件数。在你不确定字段名或组件是否受支持时先调它。",
+        "risk": "low",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "spec": {
+              "description": "要校验的 dsh-ui 规格（对象 / 根级数组 / 双重编码 JSON 字符串）"
+            }
+          },
+          "required": [
+            "spec"
+          ]
+        }
+      },
+      {
+        "name": "genui_status",
+        "description": "返回 GenUI 面板的当前状态：数据目录、当前 seq、标题、组件数、被丢弃节点数、是否含可交互动作、以及各开关（面板自动打开 / 围栏接管 / 动作回路）。",
+        "risk": "low",
+        "schema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      }
+    ],
+    "skills": [
+      "skills/genui.md"
+    ],
+    "settings": [
+      {
+        "key": "enabled",
+        "title": "启用 GenUI / Enable GenUI",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "key": "autoOpenPanel",
+        "title": "渲染时自动打开 GenUI 面板 / Auto-open the panel when rendering",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "key": "interceptFences",
+        "title": "接管 dsh-ui 围栏（改写为一行指引并渲染到面板） / Capture dsh-ui fences from replies",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "key": "actionLoop",
+        "title": "面板动作回传模型（作为一条 genui-action 用户消息） / Send panel actions back to the model",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "key": "maxNodes",
+        "title": "单份规格的组件数上限 20-200 / Max components per spec (20-200)",
+        "type": "number",
+        "default": 200
+      }
+    ]
+  },
+  "permissions": [
+    "ui.panel",
+    "agent.tool.register",
+    "agent.prompt.inject",
+    "agent.extension"
+  ],
+  "engines": {
+    "piDesktop": ">=0.15.3"
+  },
+  "activationEvents": [
+    "onCommand:genui.open",
+    "onCommand:genui.status",
+    "onCommand:genui.clear",
+    "onCommand:genui.sample",
+    "onStartup"
+  ],
+  "icon": "assets/icon.png",
+  "homepage": "https://github.com/GzxingR/pi-desktop-genui",
+  "repository": "https://github.com/GzxingR/pi-desktop-genui"
+}

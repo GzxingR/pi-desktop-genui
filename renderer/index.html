@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="pi-plugin-chrome" content="v2" />
+    <title></title>
+    <link rel="stylesheet" href="genui.css" />
+  </head>
+  <body>
+    <!--
+     * PI-Desktop reserves exactly a transparent 46px drag band and overlays
+     * only the host-owned three-button capsule. The visible panel header belongs
+     * to the plugin. Development panels show a reminder that this
+     * band is not clickable outside the capsule. For fixed/sticky top UI,
+     * use top: var(--pi-plugin-titlebar-height, 46px).
+     * The plugin header below is sticky under that band; its own controls opt
+     * out of dragging with -webkit-app-region: no-drag.
+     -->
+    <header class="gx-header" id="gx-header">
+      <div class="gx-header__lead">
+        <span class="gx-header__mark" aria-hidden="true"></span>
+        <h1 class="gx-header__title" id="gx-title"></h1>
+      </div>
+      <div class="gx-header__trail">
+        <span class="gx-meta" id="gx-meta">
+          <span class="gx-meta__dot" id="gx-meta-dot" aria-hidden="true"></span>
+          <span id="gx-meta-text"></span>
+        </span>
+        <button
+          type="button"
+          class="gx-btn gx-btn--ghost gx-btn--small gx-nodrag"
+          id="gx-clear"
+        ></button>
+      </div>
+    </header>
+
+    <div class="gx-dropped" id="gx-dropped" role="note" hidden></div>
+
+    <main class="gx-root" id="gx-root"></main>
+
+    <p class="gx-sr" id="gx-status" role="status" aria-live="polite"></p>
+    <div class="gx-toasts" id="gx-toasts" aria-hidden="false"></div>
+
+    <script src="genui.js" defer></script>
+  </body>
+</html>
